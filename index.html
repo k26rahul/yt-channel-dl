@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Download Dashboard</title>
+
+    <!-- Iconify -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@3.0.0/dist/iconify-icon.min.js"></script>
+
+    <style>
+      body {
+        background-color: #f3f4f6;
+        min-height: 100vh;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #1f2937;
+      }
+
+      h1 {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      #videoGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 24px;
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .card img {
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+      }
+
+      .card-content {
+        padding: 16px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .card h2 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .card .date {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 8px;
+      }
+
+      .card .description {
+        font-size: 0.875rem;
+        color: #374151;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .status-row span {
+        color: #4b5563;
+        font-size: 0.875rem;
+      }
+
+      .text-green {
+        color: #22c55e;
+        font-size: 1.5rem;
+      }
+
+      .text-red {
+        color: #ef4444;
+        font-size: 1.5rem;
+      }
+
+      .error {
+        text-align: center;
+        color: #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📺 Video Dashboard</h1>
+
+    <div id="videoGrid"></div>
+
+    <script>
+      async function loadData() {
+        const [metaRes, doneRes] = await Promise.all([
+          fetch('./downloads/metadata.json'),
+          fetch('./downloads/downloaded.json'),
+        ]);
+        const metadata = await metaRes.json();
+        const downloadedIds = new Set(await doneRes.json());
+
+        const grid = document.getElementById('videoGrid');
+        grid.innerHTML = '';
+
+        metadata.forEach(v => {
+          const isDownloaded = downloadedIds.has(v.id);
+          const icon = isDownloaded
+            ? '<iconify-icon icon="mdi:check-circle" class="text-green"></iconify-icon>'
+            : '<iconify-icon icon="mdi:close-circle" class="text-red"></iconify-icon>';
+
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${v.thumbnail}" alt="${v.title}">
+            <div class="card-content">
+              <h2>${v.title}</h2>
+              <p class="date">${v.upload_date}</p>
+              <p class="description">${v.description || ''}</p>
+              <div class="status-row">
+                  <span>Status:</span>
+                  ${icon}
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      loadData().catch(err => {
+        console.error(err);
+        document.getElementById('videoGrid').innerHTML =
+          "<p class='error'>Failed to load metadata files.</p>";
+      });
+    </script>
+  </body>
+</html>
