@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Video Download Dashboard</title>
 
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📥</text></svg>"
+    />
+
     <!-- Iconify -->
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@3.0.0/dist/iconify-icon.min.js"></script>
 
@@ -68,6 +73,29 @@
         overflow: hidden;
       }
 
+      .card h2 a {
+        text-decoration: none;
+        color: #1f2937;
+      }
+
+      .card h2 a:hover {
+        text-decoration: underline;
+      }
+
+      .open-file {
+        font-size: 0.875rem;
+        color: #2563eb;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 8px;
+      }
+
+      .open-file:hover {
+        text-decoration: underline;
+      }
+
       .card .date {
         font-size: 0.875rem;
         color: #6b7280;
@@ -111,8 +139,9 @@
       }
     </style>
   </head>
+
   <body>
-    <h1>📺 Video Dashboard</h1>
+    <h1>📥 Video Download Dashboard</h1>
 
     <div id="videoGrid"></div>
 
@@ -136,16 +165,30 @@
 
           const card = document.createElement('div');
           card.className = 'card';
+
+          // link to downloaded video (only if exists)
+          const localFile = isDownloaded
+            ? `<a href="./downloads/videos/${v.title}.120B [${v.id}].mp4" target="_blank" class="open-file">
+                  <iconify-icon icon="mdi:open-in-new"></iconify-icon> Open Downloaded File
+               </a>`
+            : '';
+
           card.innerHTML = `
             <img src="${v.thumbnail}" alt="${v.title}">
             <div class="card-content">
-              <h2>${v.title}</h2>
+              <h2>
+                <a href="${v.url}" target="_blank" rel="noopener noreferrer">
+                  ${v.title}
+                  <iconify-icon icon="mdi:open-in-new" style="font-size:1rem;vertical-align:middle;"></iconify-icon>
+                </a>
+              </h2>
               <p class="date">${v.upload_date}</p>
               <p class="description">${v.description || ''}</p>
               <div class="status-row">
                   <span>Status:</span>
                   ${icon}
               </div>
+              ${localFile}
             </div>
           `;
           grid.appendChild(card);
